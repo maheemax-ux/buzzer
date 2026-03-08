@@ -1,0 +1,41 @@
+<!-- public/admin.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz Master Screen</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #111; color: white; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        h1 { font-size: 24px; color: #888; }
+        #winner { font-size: 100px; font-weight: bold; color: #2ecc71; margin: 20px; text-transform: uppercase; }
+        button { padding: 20px 40px; font-size: 24px; background: #3498db; color: white; border: none; border-radius: 10px; cursor: pointer; position: absolute; bottom: 50px; }
+        button:hover { background: #2980b9; }
+        .waiting { color: #555; }
+    </style>
+</head>
+<body>
+    <h1>First to Buzz:</h1>
+    <div id="winner" class="waiting">Waiting...</div>
+    
+    <button onclick="resetGame()">RESET BUZZERS</button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        socket.on('buzzer_pressed', (name) => {
+            const winnerDiv = document.getElementById('winner');
+            if(name) {
+                winnerDiv.innerText = name;
+                winnerDiv.classList.remove('waiting');
+            } else {
+                winnerDiv.innerText = "Waiting...";
+                winnerDiv.classList.add('waiting');
+            }
+        });
+
+        function resetGame() {
+            socket.emit('reset_game');
+        }
+    </script>
+</body>
+</html>

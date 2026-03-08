@@ -1,0 +1,72 @@
+<!-- public/buzzer.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Team Buzzer</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #222; color: white; height: 100vh; margin: 0; display: flex; flex-direction: column; justify-content: center; }
+        input { padding: 15px; font-size: 20px; border-radius: 10px; border: none; margin-bottom: 20px; }
+        button { 
+            width: 90%; height: 300px; font-size: 40px; font-weight: bold; 
+            background: #e74c3c; border: 5px solid white; color: white; 
+            border-radius: 50%; cursor: pointer; transition: 0.2s;
+        }
+        button:disabled { background: #555; color: #888; border-color: #444; }
+        .status { margin-top: 20px; font-size: 20px; color: #f1c40f; }
+    </style>
+</head>
+<body>
+    <!-- Step 1: Enter Name -->
+    <div id="login-screen">
+        <h2>Enter Team Name</h2>
+        <input type="text" id="nameInput" placeholder="e.g. Team A">
+        <br>
+        <button onclick="joinGame()">JOIN</button>
+    </div>
+
+    <!-- Step 2: Buzzer -->
+    <div id="game-screen" style="display:none;">
+        <h2 id="teamLabel">Team</h2>
+        <button id="buzzerBtn" onclick="buzz()">BUZZ!</button>
+        <div id="status" class="status">Ready...</div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        let myName = "";
+
+        function joinGame() {
+            const name = document.getElementById('nameInput').value;
+            if(name) {
+                myName = name;
+                document.getElementById('teamLabel').innerText = myName;
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('game-screen').style.display = 'block';
+            } else {
+                alert("Please enter a team name!");
+            }
+        }
+
+        function buzz() {
+            socket.emit('press_buzzer', myName);
+            document.getElementById('status').innerText = "Pressed! Waiting for host...";
+        }
+
+        // Listen for lock/unlock from server
+        socket.on('lock_state', (isLocked) => {
+            const btn = document.getElementById('buzzerBtn');
+            const status = document.getElementById('status');
+            
+            if (isLocked) {
+                btn.disabled = true;
+                status.innerText = "LOCKED!";
+            } else {
+                btn.disabled = false;
+                status.innerText = "Ready...";
+            }
+        });
+    </script>
+</body>
+</html>
